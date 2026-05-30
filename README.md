@@ -1,21 +1,12 @@
-# Next.js template
+# Image Optimizer
 
-This is a Next.js template with shadcn/ui.
+# Description
+Image Optimizer is a web tool that offers different options to compress, resize, and optimize your images.
 
-## Adding components
+# Tech Stack
 
-To add components to your app, run the following command:
+<div align="center">
+    
+</div>
 
-```bash
-npx shadcn@latest add button
-```
-
-This will place the ui components in the `components` directory.
-
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
+This tool is built using *Next.js* (App Router) and React.

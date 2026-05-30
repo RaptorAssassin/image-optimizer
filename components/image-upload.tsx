@@ -17,7 +17,7 @@ export default function ImageUpload() {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const timersRef = useRef<number[]>([])
   const router = useRouter()
-  const setImageFile = useImageStore((s) => s.setFile)
+  const setOriginalFile = useImageStore((s) => s.setOriginalFile)
 
   const errorWaitTime = 2000 // ms
   const successWaitTime = 1500 // ms
@@ -82,7 +82,7 @@ export default function ImageUpload() {
     }
 
     try {
-      setImageFile(file)
+      setOriginalFile(file)
       if (inputRef.current) inputRef.current.value = ""
       setStatus("success")
       pushTimeout(() => {
