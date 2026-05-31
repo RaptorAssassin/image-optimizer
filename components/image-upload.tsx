@@ -5,7 +5,7 @@ import { motion, AnimatePresence, type Transition } from "framer-motion"
 import { Spinner } from "./ui/spinner"
 import { SUPPORTED_INPUT_FORMATS } from "../data/fileFormats"
 import { useRouter } from "next/navigation"
-import { useImageStore } from "../data/imageStore"
+import { useImageStore } from "../lib/imageStore"
 
 export default function ImageUpload() {
   const [status, setStatus] = useState<

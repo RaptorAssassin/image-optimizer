@@ -2,7 +2,7 @@
 import React, { useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useImageStore } from "../../data/imageStore"
+import { useImageStore } from "../../lib/imageStore"
 import ImageDiffViewer from "@/components/image-diff-viewer"
 import ImageEditSettings from "@/components/image-edit-settings"
 
@@ -22,7 +22,7 @@ export default function EditPage() {
         afterSrc={"/public/hackerman.png"}
         className="col-span-1 h-full lg:col-span-5"
       />
-      <ImageEditSettings />
+      <ImageEditSettings className="col-span-1 h-full lg:col-span-7" />
     </div>
   )
 }
