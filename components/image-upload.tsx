@@ -127,7 +127,6 @@ export default function ImageUpload() {
         return
       }
     } catch (err: any) {
-      // If the user cancelled the native picker, don't fallback to re-opening
       const name = err?.name || ""
       if (
         name === "AbortError" ||
@@ -136,14 +135,10 @@ export default function ImageUpload() {
       ) {
         return
       }
-      // otherwise fall back to the input click
     }
 
-    // Fallback: trigger the hidden input. Add a focus listener to ensure
-    // any lingering UI state is cleared when the dialog closes.
     if (inputRef.current) {
       const onWindowFocus = () => {
-        // If a file was selected the input will have files; otherwise reset to idle
         const hasFileSelected = !!(
           inputRef.current &&
           inputRef.current.files &&
@@ -205,7 +200,6 @@ export default function ImageUpload() {
   const textSpring: Transition = { type: "spring", stiffness: 700, damping: 24 }
   const stateKey = isDragActive ? "drag" : status
 
-  // Base text styling for non-error states — edit this one string to change all texts
   const baseTextClass =
     "text-center text-lg font-semibold select-none md:text-2xl"
 
