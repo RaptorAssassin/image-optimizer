@@ -25,6 +25,11 @@ type ImageState = {
   // Helpers to get ArrayBuffers from working/original
   getArrayBuffer: () => Promise<ArrayBuffer | null>
   getOriginalArrayBuffer: () => Promise<ArrayBuffer | null>
+  // Sizes (bytes)
+  originalFileSize: number | null
+  workingFileSize: number | null
+  // Recalculate working file size (can pass a file/blob or it will use current working file)
+  updateWorkingFileSize: (file?: File | Blob) => void
 }
 
 export const useImageStore = create<ImageState>((set, get) => ({
@@ -32,6 +37,8 @@ export const useImageStore = create<ImageState>((set, get) => ({
   url: null,
   originalFile: null,
   originalUrl: null,
+  originalFileSize: null,
+  workingFileSize: null,
 
   setOriginalFile: (file: File) => {
     // revoke previous original URL if present
@@ -47,7 +54,14 @@ export const useImageStore = create<ImageState>((set, get) => ({
     const workingCopy = new File([file], file.name, { type: file.type })
     const workingUrl = URL.createObjectURL(workingCopy)
 
-    set({ originalFile: file, originalUrl, file: workingCopy, url: workingUrl })
+    set({
+      originalFile: file,
+      originalUrl,
+      file: workingCopy,
+      url: workingUrl,
+      originalFileSize: file.size ?? null,
+      workingFileSize: workingCopy.size ?? null,
+    })
   },
 
   setWorkingFile: (fileOrBlob: File | Blob) => {
@@ -67,7 +81,7 @@ export const useImageStore = create<ImageState>((set, get) => ({
     }
 
     const url = URL.createObjectURL(newFile)
-    set({ file: newFile, url })
+    set({ file: newFile, url, workingFileSize: newFile.size ?? null })
   },
 
   resetWorking: () => {
@@ -75,14 +89,14 @@ export const useImageStore = create<ImageState>((set, get) => ({
     const prev = get().url
     if (prev) URL.revokeObjectURL(prev)
     if (!original) {
-      set({ file: null, url: null })
+      set({ file: null, url: null, workingFileSize: null })
       return
     }
     const workingCopy = new File([original], original.name, {
       type: original.type,
     })
     const workingUrl = URL.createObjectURL(workingCopy)
-    set({ file: workingCopy, url: workingUrl })
+    set({ file: workingCopy, url: workingUrl, workingFileSize: workingCopy.size ?? null })
   },
 
   clear: () => {
@@ -90,7 +104,7 @@ export const useImageStore = create<ImageState>((set, get) => ({
     if (prevOriginal) URL.revokeObjectURL(prevOriginal)
     const prev = get().url
     if (prev) URL.revokeObjectURL(prev)
-    set({ file: null, url: null, originalFile: null, originalUrl: null })
+    set({ file: null, url: null, originalFile: null, originalUrl: null, originalFileSize: null, workingFileSize: null })
   },
 
   getArrayBuffer: async () => {
@@ -103,5 +117,16 @@ export const useImageStore = create<ImageState>((set, get) => ({
     const f = get().originalFile
     if (!f) return null
     return f.arrayBuffer()
+  },
+  updateWorkingFileSize: (file?: File | Blob) => {
+    const f = (file as File | Blob) ?? get().file
+    if (!f) {
+      set({ workingFileSize: null })
+      return
+    }
+    // Blob and File have a size property
+    // @ts-ignore - Blob has size
+    const size = (f as any).size ?? null
+    set({ workingFileSize: size })
   },
 }))
