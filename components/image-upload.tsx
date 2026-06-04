@@ -6,7 +6,7 @@ import { Spinner } from "./ui/spinner"
 import { SUPPORTED_INPUT_FORMATS } from "../data/fileFormats"
 import { useRouter } from "next/navigation"
 import { useImageStore } from "../lib/imageStore"
-
+import { storeImage } from "@/lib/storage"
 export default function ImageUpload() {
   const [status, setStatus] = useState<
     "idle" | "uploading" | "success" | "error"
@@ -36,8 +36,6 @@ export default function ImageUpload() {
     }
   }, [])
 
-  // Fix mobile viewport height issues by setting a --vh CSS variable
-  // See: mobile browsers where 100vh can include browser UI chrome
   useEffect(() => {
     const setVh = () => {
       const vh = window.innerHeight * 0.01
@@ -53,7 +51,6 @@ export default function ImageUpload() {
     }
   }, [])
 
-  // Build accept string from supported formats
   const acceptString = SUPPORTED_INPUT_FORMATS.map((f) => f.mimeType).join(",")
   const allowedMimeTypes = SUPPORTED_INPUT_FORMATS.map((f) => f.mimeType)
   const allowedExtensions = SUPPORTED_INPUT_FORMATS.map((f) =>
@@ -74,7 +71,6 @@ export default function ImageUpload() {
   const handleSelectedFile = async (file?: File | null) => {
     if (!file) return
     if (!isValidFile(file)) {
-      // invalid file: show error state then return to idle after wait
       setStatus("error")
       if (inputRef.current) inputRef.current.value = ""
       pushTimeout(() => setStatus("idle"), errorWaitTime)
