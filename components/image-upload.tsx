@@ -6,7 +6,7 @@ import { Spinner } from "./ui/spinner"
 import { SUPPORTED_INPUT_FORMATS } from "../data/fileFormats"
 import { useRouter } from "next/navigation"
 import { useImageStore } from "../lib/imageStore"
-import { storeImage } from "@/lib/storage"
+import { storeImage, uploadImage } from "@/lib/storage"
 export default function ImageUpload() {
   const [status, setStatus] = useState<
     "idle" | "uploading" | "success" | "error"
@@ -21,6 +21,17 @@ export default function ImageUpload() {
 
   const errorWaitTime = 2000 // ms
   const successWaitTime = 1500 // ms
+
+
+  // Upload the image to CDN and save URL in localStorage
+  const processImage = async (file: File) => {
+  if (!isValidFile(file)) {
+    throw new Error("Invalid file")
+  }
+
+  const uploadedUrl = await uploadImage(file)
+  storeImage(uploadedUrl)
+}
 
   const pushTimeout = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms)
@@ -68,28 +79,29 @@ export default function ImageUpload() {
     return false
   }
 
+  // Handle a selected file (from input or drag-and-drop)
   const handleSelectedFile = async (file?: File | null) => {
-    if (!file) return
-    if (!isValidFile(file)) {
-      setStatus("error")
-      if (inputRef.current) inputRef.current.value = ""
-      pushTimeout(() => setStatus("idle"), errorWaitTime)
-      return
-    }
+  if (!file) return
 
-    try {
-      setOriginalFile(file)
-      if (inputRef.current) inputRef.current.value = ""
-      setStatus("success")
-      pushTimeout(() => {
-        router.push("/edit")
-      }, successWaitTime)
-    } catch (err) {
-      console.error(err)
-      setStatus("error")
-      pushTimeout(() => setStatus("idle"), errorWaitTime)
-    }
+  try {
+    setStatus("uploading")
+
+    await processImage(file)
+
+    setStatus("success")
+
+    pushTimeout(() => {
+      router.push("/edit")
+    }, successWaitTime)
+  } catch (err) {
+    console.error(err)
+    setStatus("error")
+
+    pushTimeout(() => {
+      setStatus("idle")
+    }, errorWaitTime)
   }
+}
 
   const selectFile = async () => {
     if (isUploading) return
