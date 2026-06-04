@@ -6,7 +6,7 @@ import { Spinner } from "./ui/spinner"
 import { SUPPORTED_INPUT_FORMATS } from "../data/fileFormats"
 import { useRouter } from "next/navigation"
 import { useImageStore } from "../lib/imageStore"
-import { storeImage, uploadImage } from "@/lib/storage"
+import { storeImage, uploadImage, isValidFile } from "@/lib/storage"
 export default function ImageUpload() {
   const [status, setStatus] = useState<
     "idle" | "uploading" | "success" | "error"
@@ -25,7 +25,8 @@ export default function ImageUpload() {
 
   // Upload the image to CDN and save URL in localStorage
   const processImage = async (file: File) => {
-  if (!isValidFile(file)) {
+    const isValid = await isValidFile(file)
+  if (!isValid) {
     throw new Error("Invalid file")
   }
 
@@ -63,21 +64,6 @@ export default function ImageUpload() {
   }, [])
 
   const acceptString = SUPPORTED_INPUT_FORMATS.map((f) => f.mimeType).join(",")
-  const allowedMimeTypes = SUPPORTED_INPUT_FORMATS.map((f) => f.mimeType)
-  const allowedExtensions = SUPPORTED_INPUT_FORMATS.map((f) =>
-    f.extension.toLowerCase()
-  )
-
-  const isValidFile = (file?: File | null) => {
-    if (!file) return false
-    if (allowedMimeTypes.includes(file.type)) return true
-    const name = file.name || ""
-    const ext = name.includes(".")
-      ? `.${name.split(".").pop()!.toLowerCase()}`
-      : ""
-    if (allowedExtensions.includes(ext)) return true
-    return false
-  }
 
   // Handle a selected file (from input or drag-and-drop)
   const handleSelectedFile = async (file?: File | null) => {

@@ -1,3 +1,5 @@
+import { fileTypeFromBuffer } from "file-type"
+
 const isOnClient = () => typeof window !== "undefined"
 
 
@@ -18,6 +20,7 @@ export const storeImage = (originalUrl: string, editedUrl?: string) => {
   if (editedUrl) {
     addToHistory(originalUrl, editedUrl)
   }
+  console.log("Stored image:", editedObj)
 }
 
 export const addToHistory = (originalUrl: string, editedUrl: string) => {
@@ -47,6 +50,9 @@ export const uploadImage = async (file: File) => {
   try {
     const response = await fetch(`${process.env.CDN_API_URL}/upload`, {
       method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.CDN_API_KEY}`, 
+      },
       body: formData,
     })
 
@@ -61,3 +67,20 @@ export const uploadImage = async (file: File) => {
     return
   }
 }
+
+
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/bmp", "image/gif", "image/svg+xml"]
+const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".avif", ".bmp", ".gif", ".svg"]
+
+export const isValidFile = async (file: File) => {
+    if (!file) return false
+
+    // Check file mime type
+    if (ALLOWED_MIME_TYPES.includes(file.type)) return true
+    
+    // Check file internally
+    const buffer = await file.arrayBuffer();
+    const type = await fileTypeFromBuffer(buffer);
+    if (!type || ALLOWED_MIME_TYPES.includes(type.mime)) return false
+    return true
+  }
