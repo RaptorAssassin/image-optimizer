@@ -12,7 +12,7 @@ import {
   ComboboxItem,
 } from "./ui/combobox"
 import { Button } from "./ui/button"
-import { getStoredImage } from "@/lib/storage"
+import { getStoredImage } from "@/lib/storage-old"
 
 export default function ImageEditSettings() {
   const [settings, setSettings] = useState({

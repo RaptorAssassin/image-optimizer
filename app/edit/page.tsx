@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useImageStore } from "../../lib/imageStore"
 import ImageDiffViewer from "@/components/image-diff-viewer"
 import ImageEditSettings from "@/components/image-edit-settings"
-import { getStoredImage } from "@/lib/storage"
+import { getStoredImage } from "@/lib/storage-old"
 
 export default function EditPage() {
   // Redirect when no image was uploaded before
@@ -20,13 +20,14 @@ export default function EditPage() {
 
   return (
     <div className="grid h-full grid-cols-1 lg:grid-cols-12">
+      {originalUrl && editedUrl && (
+        <ImageDiffViewer
+          beforeSrc={originalUrl}
+          afterSrc={editedUrl}
+          className="col-span-1 h-full lg:col-span-5"
+        />
+      )}
 
-        { (originalUrl && editedUrl) && ( <ImageDiffViewer
-        beforeSrc={originalUrl}
-        afterSrc={editedUrl}
-        className="col-span-1 h-full lg:col-span-5"
-      />) }
-     
       <ImageEditSettings />
     </div>
   )

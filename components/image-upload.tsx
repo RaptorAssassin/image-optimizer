@@ -6,8 +6,8 @@ import { Spinner } from "./ui/spinner"
 import { SUPPORTED_INPUT_FORMATS } from "../data/fileFormats"
 import { useRouter } from "next/navigation"
 import { useImageStore } from "../lib/imageStore"
-import { processImage } from "@/lib/storage"
-import { redirect } from "@/lib/storage"
+import { processImage } from "@/lib/storage-old"
+import { redirect } from "@/lib/storage-old"
 
 export default function ImageUpload() {
   const [status, setStatus] = useState<
