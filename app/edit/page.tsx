@@ -20,12 +20,14 @@ export default function EditPage() {
 
   return (
     <div className="grid h-full grid-cols-1 lg:grid-cols-12">
-      <ImageDiffViewer
+
+        { (originalUrl && editedUrl) && ( <ImageDiffViewer
         beforeSrc={originalUrl}
         afterSrc={editedUrl}
         className="col-span-1 h-full lg:col-span-5"
-      />
-      <ImageEditSettings className="col-span-1 h-full lg:col-span-7" />
+      />) }
+     
+      <ImageEditSettings />
     </div>
   )
 }

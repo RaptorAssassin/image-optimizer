@@ -21,7 +21,7 @@ export const redirect = (url: string) => {
  * If an editedUrl is provided, it also adds the original and edited URLs to the history in localStorage.
  */
 export const storeImage = (originalUrl: string, editedUrl?: string) => {
-  if (!isOnClient) return
+  if (!isOnClient()) return
   // Store the new image in the "current" object in localStorage
   const stored = localStorage.getItem("current")
   const currentObj = stored ? JSON.parse(stored) : {}
@@ -46,7 +46,7 @@ export const storeImage = (originalUrl: string, editedUrl?: string) => {
  * @param editedUrl - The URL of the edited image.
  */
 export const addToHistory = (originalUrl: string, editedUrl: string) => {
-  if (!isOnClient) return
+  if (!isOnClient()) return
   const stored = localStorage.getItem("history")
   const currentHistory = stored ? JSON.parse(stored) : []
   localStorage.setItem(
@@ -70,34 +70,22 @@ export const getStoredImage = () => {
 }
 
 /**
- * Uploads an image file to the CDN and returns the URL of the uploaded image.
+ * Calls the API route to upload an image to the CDN and returns the URL of the uploaded image.
  * @param file - File to upload to the CDN
  * @returns The Url of the uploaded image.
  * @throws Error when the upload fails.
  */
 export const uploadImage = async (file: File) => {
-  const formData = new FormData()
-  formData.append("file", file)
-
-  try {
-    const response = await fetch(`${process.env.CDN_API_URL}/upload`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.CDN_API_KEY}`,
-      },
-      body: formData,
-    })
-
-    if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error("Failed to upload image", errorData)
-    }
-
-    const { url } = await response.json()
-    return url
-  } catch (error) {
-    throw new Error(error, "Failed to upload image")
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: file,
+  })
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Failed to upload image: ${errorText}`)
   }
+  const { url } = await response.json()
+  return url
 }
 
 const ALLOWED_MIME_TYPES = [
@@ -143,7 +131,7 @@ export const isValidFile = async (file: File) => {
  * @param file - The file to process
  */
 export const processImage = async (file: File) => {
-    if (!isValidFile(file)) {
+    if (!( await isValidFile(file))) {
         throw new Error("Invalid file")
     }
     const uploadedUrl = await uploadImage(file)
