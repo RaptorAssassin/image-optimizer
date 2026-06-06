@@ -2,6 +2,27 @@
 import { db } from "../services/db"
 import { fileTypeFromBuffer } from "file-type"
 
+export const INPUT_FORMATS = [
+  "jpeg",
+  "jpg",
+  "png",
+  "webp",
+  "avif",
+  "gif",
+  "tiff",
+  "raw",
+  "svg",
+] as const
+export const OUTPUT_FORMATS = [
+  "jpeg",
+  "jpg",
+  "png",
+  "webp",
+  "avif",
+  "gif",
+  "tiff",
+  "raw",
+] as const
 
 /**
  * Stores the original and edited images in IndexedDB using Dexie.
@@ -20,14 +41,14 @@ export const storeImage = async (originalFile: File, editedFile?: File) => {
 
   try {
     await db.images.put({
-    id,
-    originalBlob,
-    editedBlob: editedBlob || originalBlob,
-    editedAt: new Date(),
-  })
-  console.log(`Stored image in IndexedDB with id "${id}"`)
-    } catch (error) {
-        console.error("Error storing image in IndexedDB:", error)
+      id,
+      originalBlob,
+      editedBlob: editedBlob || originalBlob,
+      editedAt: new Date(),
+    })
+    console.log(`Stored image in IndexedDB with id "${id}"`)
+  } catch (error) {
+    console.error("Error storing image in IndexedDB:", error)
   }
 }
 

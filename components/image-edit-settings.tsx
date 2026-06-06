@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { OUTPUT_FORMATS } from "../lib/settingsStore"
 import { Slider } from "./ui/slider"
 import {
   Combobox,
@@ -13,6 +12,7 @@ import {
 } from "./ui/combobox"
 import { Button } from "./ui/button"
 import { getStoredImage } from "@/lib/storage-old"
+import { OUTPUT_FORMATS } from "@/lib/storage"
 
 export default function ImageEditSettings() {
   const [settings, setSettings] = useState({
