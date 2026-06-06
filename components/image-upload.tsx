@@ -1,13 +1,11 @@
 "use client"
 import { useRef, useState, useEffect } from "react"
+import { storeImage } from "@/lib/storage"
 import { UploadIcon, Check, X } from "lucide-react"
 import { motion, AnimatePresence, type Transition } from "framer-motion"
 import { Spinner } from "./ui/spinner"
 import { SUPPORTED_INPUT_FORMATS } from "../data/fileFormats"
 import { useRouter } from "next/navigation"
-import { useImageStore } from "../lib/imageStore"
-import { processImage } from "@/lib/storage"
-import { redirect } from "@/lib/storage"
 
 export default function ImageUpload() {
   const [status, setStatus] = useState<
@@ -18,10 +16,10 @@ export default function ImageUpload() {
   const isSuccess = status === "success"
   const inputRef = useRef<HTMLInputElement | null>(null)
   const timersRef = useRef<number[]>([])
-  const setOriginalFile = useImageStore((s) => s.setOriginalFile)
+  const router = useRouter()
 
   const errorWaitTime = 2000 // ms
-  const successWaitTime = 1500 // ms
+  const successWaitTime = 500 // ms
 
   const pushTimeout = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms)
@@ -61,12 +59,12 @@ export default function ImageUpload() {
     try {
       setStatus("uploading")
 
-      await processImage(file)
+      await storeImage(file)
 
       setStatus("success")
 
       pushTimeout(() => {
-        redirect("/")
+        router.push("/edit")
       }, successWaitTime)
     } catch (err) {
       console.error(err)
