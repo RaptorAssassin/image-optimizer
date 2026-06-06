@@ -14,34 +14,18 @@ import { Button } from "./ui/button"
 import { getStoredImage } from "@/lib/storage-old"
 import { OUTPUT_FORMATS } from "@/lib/storage"
 
-export default function ImageEditSettings() {
-  const [settings, setSettings] = useState({
-    format: "webp",
-    quality: 80,
-  })
-
-  const processImage = async () => {
-    const originalUrl = getStoredImage()
-    if (!originalUrl) return
-
-    const formData = new FormData()
-    formData.append("originalUrl", originalUrl)
-    formData.append("settings", JSON.stringify(settings))
-    try {
-      const response = await fetch("/api/process-image", {
-        method: "POST",
-        body: formData,
-      })
-      if (!response.ok) {
-        console.error("Failed to process image")
-        return
-      }
-    } catch (error) {
-      console.error("Error processing image")
-      return
-    }
+interface ImageEditSettingsProps {
+  settings: {
+    format: string
+    quality: number
   }
+  onSettingsChange: (settings: ImageEditSettingsProps["settings"]) => void
+}
 
+export default function ImageEditSettings({
+  settings,
+  onSettingsChange,
+}: ImageEditSettingsProps) {
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* format combobox */}
@@ -57,7 +41,7 @@ export default function ImageEditSettings() {
               <ComboboxItem
                 key={format}
                 value={format}
-                onSelect={() => setSettings((prev) => ({ ...prev, format }))}
+                onSelect={() => onSettingsChange({ ...settings, format })}
               >
                 {format}
               </ComboboxItem>
@@ -66,14 +50,16 @@ export default function ImageEditSettings() {
         </ComboboxContent>
       </Combobox>
       {/* quality slider */}
-      <label htmlFor="quality" className="text-sm font-medium"></label>
+      <label htmlFor="quality" className="text-sm font-medium">
+        Quality
+      </label>
       <Slider
         id="quality"
         min={0}
         max={100}
         value={[settings.quality]}
         onValueChange={(value) =>
-          setSettings((prev) => ({ ...prev, quality: value[0] }))
+          onSettingsChange({ ...settings, quality: value[0] })
         }
       />
     </div>
