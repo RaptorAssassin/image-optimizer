@@ -53,9 +53,9 @@ export const storeImage = async (originalFile: File, editedFile?: File) => {
 }
 
 /**
- * @returns - The stored image from IndexedDB as a Blob. If no image is found, returns null.
+ * @returns - The stored original image from IndexedDB as a Blob. If no image is found, returns null.
  */
-export const getImage = async () => {
+export const getOriginalImage = async () => {
   const image = await db.images.get("image")
   const originalBlob = image?.originalBlob as Blob
   return originalBlob
@@ -64,6 +64,35 @@ export const getImage = async () => {
         lastModified: Date.now(),
       })
     : null
+}
+
+/**
+ * @returns - The stored edited image from IndexedDB as a Blob. If no image is found, returns null.
+ */
+export const getEditedImage = async () => {
+  const image = await db.images.get("image")
+  const editedBlob = image?.editedBlob as Blob
+  return editedBlob
+    ? new File([editedBlob], "image", {
+        type: editedBlob.type,
+        lastModified: Date.now(),
+      })
+    : null
+}
+
+/**
+ * Downloads the provided file.
+ * @param file - The file to be downloaded.
+ */
+export const downloadImage = async (file: File | Blob) => {
+  const url = URL.createObjectURL(file)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = "edited-image"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 const ALLOWED_MIME_TYPES = [

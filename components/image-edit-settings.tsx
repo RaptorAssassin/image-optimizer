@@ -28,7 +28,7 @@ export default function ImageEditSettings({
 }: ImageEditSettingsProps) {
   return (
     <div className="flex flex-col gap-4 p-4">
-      {/* format combobox */}
+      {/* Format combobox */}
       <Combobox>
         <ComboboxInput
           placeholder="Select output format"
@@ -49,7 +49,7 @@ export default function ImageEditSettings({
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
-      {/* quality slider */}
+      {/* Quality slider */}
       <label htmlFor="quality" className="text-sm font-medium">
         Quality
       </label>
@@ -62,6 +62,8 @@ export default function ImageEditSettings({
           onSettingsChange({ ...settings, quality: value[0] })
         }
       />
+      {/* Download button */}
+      <Button onClick={downloadImage}>Download</Button>
     </div>
   )
 }

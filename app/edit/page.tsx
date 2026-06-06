@@ -52,6 +52,12 @@ export default function EditPage() {
     }
   }
 
+  // On settings change process the image with new settings
+  const handleSettingsChange = (newSettings: any) => {
+    setSettings((settings) => ({ ...settings, ...newSettings }))
+    processImage()
+  }
+
   return (
     <div className="grid h-full grid-cols-1 lg:grid-cols-12">
       {originalImage && editedImage && (
@@ -62,7 +68,10 @@ export default function EditPage() {
         />
       )}
 
-      <ImageEditSettings settings={settings} onSettingsChange={setSettings} />
+      <ImageEditSettings
+        settings={settings}
+        onSettingsChange={handleSettingsChange}
+      />
     </div>
   )
 }
