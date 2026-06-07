@@ -13,13 +13,13 @@ export default function ImageUpload() {
   >("idle")
   const [isDragActive, setIsDragActive] = useState(false)
   const isUploading = status === "uploading"
-  const isSuccess = status === "success"
   const inputRef = useRef<HTMLInputElement | null>(null)
   const timersRef = useRef<number[]>([])
+  const isMounted = useRef(true) // <-- Tracks if the component is still active
   const router = useRouter()
 
-  const errorWaitTime = 2000 // ms
-  const successWaitTime = 500 // ms
+  const errorWaitTime = 2000
+  const successWaitTime = 500
 
   const pushTimeout = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms)
@@ -27,9 +27,11 @@ export default function ImageUpload() {
     return id
   }
 
-  // cleanup any pending timers on unmount
+  // Handle component unmount safely
   useEffect(() => {
+    isMounted.current = true
     return () => {
+      isMounted.current = false // <-- Blocks any further state updates
       timersRef.current.forEach((id) => window.clearTimeout(id))
       timersRef.current = []
     }
@@ -40,7 +42,6 @@ export default function ImageUpload() {
       const vh = window.innerHeight * 0.01
       document.documentElement.style.setProperty("--vh", `${vh}px`)
     }
-
     setVh()
     window.addEventListener("resize", setVh)
     window.addEventListener("orientationchange", setVh)
@@ -52,26 +53,30 @@ export default function ImageUpload() {
 
   const acceptString = SUPPORTED_INPUT_FORMATS.map((f) => f.mimeType).join(",")
 
-  // Handle a selected file (from input or drag-and-drop)
   const handleSelectedFile = async (file?: File | null) => {
     if (!file) return
 
     try {
       setStatus("uploading")
-
       await storeImage(file)
 
+      // Safety check: Don't update state if user closed tab or navigated away mid-upload
+      if (!isMounted.current) return
       setStatus("success")
 
       pushTimeout(() => {
-        router.push("/edit")
+        // Only route if we are still mounted
+        if (isMounted.current) {
+          router.push("/edit")
+        }
       }, successWaitTime)
     } catch (err) {
       console.error(err)
+      if (!isMounted.current) return
       setStatus("error")
 
       pushTimeout(() => {
-        setStatus("idle")
+        if (isMounted.current) setStatus("idle")
       }, errorWaitTime)
     }
   }
@@ -79,7 +84,6 @@ export default function ImageUpload() {
   const selectFile = async () => {
     if (isUploading) return
 
-    // Try modern File System Access API for a filtered picker where available
     try {
       const show = (window as any).showOpenFilePicker
       if (typeof show === "function") {
@@ -109,26 +113,13 @@ export default function ImageUpload() {
       }
     } catch (err: any) {
       const name = err?.name || ""
-      if (
-        name === "AbortError" ||
-        name === "NotAllowedError" ||
-        name === "SecurityError"
-      ) {
+      if (["AbortError", "NotAllowedError", "SecurityError"].includes(name)) {
         return
       }
     }
 
+    // Simplified native click fallback without the problematic window focus listener
     if (inputRef.current) {
-      const onWindowFocus = () => {
-        const hasFileSelected = !!(
-          inputRef.current &&
-          inputRef.current.files &&
-          inputRef.current.files.length > 0
-        )
-        if (!hasFileSelected) setStatus("idle")
-        window.removeEventListener("focus", onWindowFocus)
-      }
-      window.addEventListener("focus", onWindowFocus)
       inputRef.current.click()
     }
   }
@@ -136,8 +127,12 @@ export default function ImageUpload() {
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null
     handleSelectedFile(file)
+
+    // Reset input value so selecting the same file again still fires onChange
+    if (e.target) e.target.value = ""
   }
 
+  // --- Keep all your Drag & Drop / Animation code exactly the same below this line ---
   const onDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     const hasFiles = Array.from(e.dataTransfer.items || []).some(
@@ -173,14 +168,8 @@ export default function ImageUpload() {
     damping: 20,
     bounce: 0.35,
   }
-  const successSpring: Transition = {
-    type: "spring",
-    stiffness: 500,
-    damping: 30,
-  }
   const textSpring: Transition = { type: "spring", stiffness: 700, damping: 24 }
   const stateKey = isDragActive ? "drag" : status
-
   const baseTextClass =
     "text-center text-lg font-semibold select-none md:text-2xl"
 
@@ -194,43 +183,39 @@ export default function ImageUpload() {
     icon: React.ReactNode
     text: React.ReactNode
     textClassName?: string
-  }) => {
-    return (
+  }) => (
+    <motion.div
+      key={panelKey}
+      className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.12 }}
+    >
       <motion.div
-        key={panelKey}
-        className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.12 }}
+        className="pointer-events-none flex items-center justify-center"
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={spring}
       >
-        <motion.div
-          className="pointer-events-none flex items-center justify-center"
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={spring}
-        >
-          {icon}
-        </motion.div>
-        <motion.span
-          className={textClassName ?? baseTextClass}
-          initial={{ y: 8, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -8, opacity: 0 }}
-          transition={textSpring}
-        >
-          {text}
-        </motion.span>
+        {icon}
       </motion.div>
-    )
-  }
+      <motion.span
+        className={textClassName ?? baseTextClass}
+        initial={{ y: 8, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -8, opacity: 0 }}
+        transition={textSpring}
+      >
+        {text}
+      </motion.span>
+    </motion.div>
+  )
 
   return (
     <div
-      className={`mx-auto mt-6 mb-6 box-border flex max-h-[calc(var(--vh,1vh)*100-3rem)] min-h-[60vh] w-[92vw] max-w-[1200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-accent p-4 transition-all duration-300 ease-in-out sm:p-6 md:mt-12 md:h-auto md:max-h-[calc(var(--vh,1vh)*100-4.5rem)] md:min-h-[50vh] md:w-[80vw] md:rounded-xl md:p-8 lg:w-[65vw] xl:w-[55vw] ${
-        isDragActive ? "bg-accent/50" : "hover:bg-accent/50"
-      }`}
+      className={`mx-auto mt-6 mb-6 box-border flex max-h-[calc(var(--vh,1vh)*100-3rem)] min-h-[60vh] w-[92vw] max-w-300 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-accent p-4 transition-all duration-300 ease-in-out sm:p-6 md:mt-12 md:h-auto md:max-h-[calc(var(--vh,1vh)*100-4.5rem)] md:min-h-[50vh] md:w-[80vw] md:rounded-xl md:p-8 lg:w-[65vw] xl:w-[55vw] ${isDragActive ? "bg-accent/50" : "hover:bg-accent/50"}`}
       onClick={selectFile}
       onDrop={onDrop}
       onDragOver={onDragOver}
@@ -244,7 +229,6 @@ export default function ImageUpload() {
         className="hidden"
         onChange={onFileChange}
       />
-
       <div className="relative flex h-full w-full flex-col items-center justify-center gap-2">
         <AnimatePresence initial={false} mode="wait">
           {stateKey === "uploading" ? (

@@ -11,8 +11,12 @@ import {
   ComboboxItem,
 } from "./ui/combobox"
 import { Button } from "./ui/button"
-import { getStoredImage } from "@/lib/storage-old"
-import { OUTPUT_FORMATS } from "@/lib/storage"
+import {
+  getOriginalImage,
+  getEditedImage,
+  downloadEditedImage,
+  OUTPUT_FORMATS,
+} from "@/lib/storage"
 
 interface ImageEditSettingsProps {
   settings: {
@@ -28,6 +32,7 @@ export default function ImageEditSettings({
 }: ImageEditSettingsProps) {
   return (
     <div className="flex flex-col gap-4 p-4">
+      <h1 className="text-4xl font-extrabold">Settings</h1>
       {/* Format combobox */}
       <Combobox>
         <ComboboxInput
@@ -63,7 +68,7 @@ export default function ImageEditSettings({
         }
       />
       {/* Download button */}
-      <Button onClick={downloadImage}>Download</Button>
+      <Button onClick={downloadEditedImage}>Download</Button>
     </div>
   )
 }

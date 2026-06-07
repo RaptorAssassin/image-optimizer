@@ -81,10 +81,14 @@ export const getEditedImage = async () => {
 }
 
 /**
- * Downloads the provided file.
- * @param file - The file to be downloaded.
+ * Downloads the edited image.
  */
-export const downloadImage = async (file: File | Blob) => {
+export const downloadEditedImage = async () => {
+  const file = await getEditedImage()
+  if (!file) {
+    console.error("No edited image found to download.")
+    return
+  }
   const url = URL.createObjectURL(file)
   const link = document.createElement("a")
   link.href = url

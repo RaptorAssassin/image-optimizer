@@ -4,14 +4,22 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import ImageDiffViewer from "@/components/image-diff-viewer"
 import ImageEditSettings from "@/components/image-edit-settings"
-import { getStoredImage } from "@/lib/storage-old"
+import { getOriginalImage } from "@/lib/storage"
 
 export default function EditPage() {
   // Redirect when no image was uploaded before
   const router = useRouter()
   useEffect(() => {
-    setOriginalImage(getStoredImage())
-    if (!originalImage) router.replace("/")
+    const loadImage = async () => {
+      const image = await getOriginalImage()
+      if (!image) {
+        router.replace("/")
+        return
+      }
+      setOriginalImage(image)
+      setEditedImage(image)
+    }
+    loadImage()
   }, [])
 
   const [originalImage, setOriginalImage] = useState<File | null>(null)
@@ -59,7 +67,7 @@ export default function EditPage() {
   }
 
   return (
-    <div className="grid h-full grid-cols-1 lg:grid-cols-12">
+    <div className="grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden">
       {originalImage && editedImage && (
         <ImageDiffViewer
           beforeSrc={originalImage}
