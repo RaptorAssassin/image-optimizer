@@ -24,17 +24,25 @@ interface ImageEditSettingsProps {
     quality: number
   }
   onSettingsChange: (settings: ImageEditSettingsProps["settings"]) => void
+  className?: string
 }
 
 export default function ImageEditSettings({
   settings,
   onSettingsChange,
+  className,
 }: ImageEditSettingsProps) {
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className={`flex h-full w-full flex-col gap-4 p-4 ${className}`}>
       <h1 className="text-4xl font-extrabold">Settings</h1>
       {/* Format combobox */}
-      <Combobox>
+      <Combobox
+        items={OUTPUT_FORMATS}
+        value={settings.format}
+        onValueChange={(value) =>
+          onSettingsChange({ ...settings, format: value ?? "webp" })
+        }
+      >
         <ComboboxInput
           placeholder="Select output format"
           value={settings.format}
@@ -43,11 +51,7 @@ export default function ImageEditSettings({
           <ComboboxList>
             <ComboboxEmpty>No matching format found.</ComboboxEmpty>
             {OUTPUT_FORMATS.map((format) => (
-              <ComboboxItem
-                key={format}
-                value={format}
-                onSelect={() => onSettingsChange({ ...settings, format })}
-              >
+              <ComboboxItem key={format} value={format}>
                 {format}
               </ComboboxItem>
             ))}
@@ -55,9 +59,14 @@ export default function ImageEditSettings({
         </ComboboxContent>
       </Combobox>
       {/* Quality slider */}
-      <label htmlFor="quality" className="text-sm font-medium">
-        Quality
-      </label>
+      <div className="grid w-full grid-cols-2 items-end">
+        <label htmlFor="quality" className="text-sm font-medium text-left">
+          Quality
+        </label>
+        <label htmlFor="quality" className="text-sm font-medium text-right">
+          {settings.quality}%
+        </label>
+      </div>
       <Slider
         id="quality"
         min={0}
@@ -66,6 +75,7 @@ export default function ImageEditSettings({
         onValueChange={(value) =>
           onSettingsChange({ ...settings, quality: value[0] })
         }
+        disabled={settings.format === "raw"}
       />
       {/* Download button */}
       <Button onClick={downloadEditedImage}>Download</Button>

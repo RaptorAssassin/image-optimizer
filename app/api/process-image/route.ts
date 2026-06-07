@@ -1,45 +1,23 @@
 import { NextResponse } from "next/server"
 import sharp from "sharp"
-import FormData from "form-data"
-import { Readable } from "stream"
 
 export async function POST(request: Request) {
   const requestFormData = await request.formData()
-  
-  const originalUrl = requestFormData.get("originalUrl") as string
-  const editedUrl = requestFormData.get("editedUrl") as string | null
+  const image = requestFormData.get("image") as Blob | null
   const settings = requestFormData.get("settings") as string
 
-  if (!originalUrl) {
-    return NextResponse.json({ error: "Missing originalUrl" }, { status: 400 })
+  if (!image) {
+    return NextResponse.json({ error: "Missing image" }, { status: 400 })
   }
 
-  // Delete existing edited image
-  if (editedUrl) {
-    try {
-      const pathname = new URL(editedUrl).pathname
-      const editedId = pathname.split("/").pop()
-      await fetch(`${process.env.CDN_API_URL}/upload/${editedId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${process.env.CDN_API_KEY}` },
-      })
-    } catch (error) {
-      console.error("Error deleting edited image:", error)
-    }
-  }
-
-  // Get the image from the URL to process with sharp
-  const response = await fetch(originalUrl)
-  const arrayBuffer = await response.arrayBuffer()
-  const imageBuffer = Buffer.from(arrayBuffer)
-
-  // Process the image with sharp
-  const processedBuffer = await sharp(imageBuffer)
-
-  const parsedSettings = typeof settings === "string" ? JSON.parse(settings) : settings
-  const format = parsedSettings.format.toLowerCase() || "webp"
+  // Parse settings with fallback to defaults
+  const parsedSettings =
+    typeof settings === "string" ? JSON.parse(settings) : settings
+  const format = parsedSettings?.format?.toLowerCase() || "webp"
   const quality = parsedSettings.quality || 100
 
+  // Process the image with sharp
+  const imageBuffer = await image.arrayBuffer()
   let finalBuffer: Buffer
   switch (format) {
     case "jpg":
@@ -64,42 +42,17 @@ export async function POST(request: Request) {
     case "heif":
       finalBuffer = await sharp(imageBuffer).heif({ quality }).toBuffer()
       break
-    case "raw":
-      finalBuffer = await sharp(imageBuffer).raw().toBuffer()
-      break
     default:
       finalBuffer = await sharp(imageBuffer).webp({ quality }).toBuffer()
   }
 
-  // Uload the image to hacklub CDN and get the new URL, then save URL to localStorage
-  const formData = new FormData()
   const mimeType = `image/${format === "jpg" ? "jpeg" : format}`
 
-  formData.append("file", finalBuffer, {
-    filename: `optimized.${format}`,
-    contentType: mimeType,
+  return new NextResponse(new Uint8Array(finalBuffer), {
+    status: 200,
+    headers: {
+      "Content-Type": mimeType,
+      "Content-Disposition": `inline; filename="optimized.${format}"`,
+    },
   })
-
-
-  let uploadUrl: string | undefined
-  try {
-    const uploadResponse = await fetch(`${process.env.CDN_API_URL}/upload`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.CDN_API_KEY}`,
-        ...formData.getHeaders(),
-      },
-      body: Readable.toWeb(formData) as ReadableStream,
-    })
-    const { url } = await uploadResponse.json()
-    uploadUrl = url
-  } catch (error) {
-    console.error("Error uploading processed image:", error)
-    return NextResponse.json(
-      { error: "Failed to upload processed image" },
-      { status: 500 }
-    )
-  }
-
-  return NextResponse.json({ url: uploadUrl })
 }

@@ -10,18 +10,16 @@ export const INPUT_FORMATS = [
   "avif",
   "gif",
   "tiff",
-  "raw",
   "svg",
 ] as const
 export const OUTPUT_FORMATS = [
-  "jpeg",
+  //"jpeg",
   "jpg",
   "png",
   "webp",
   "avif",
   "gif",
   "tiff",
-  "raw",
 ] as const
 
 /**
