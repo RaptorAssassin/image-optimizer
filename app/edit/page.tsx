@@ -7,8 +7,8 @@ import ImageEditSettings from "@/components/image-edit-settings"
 import { getOriginalImage } from "@/lib/storage"
 
 export default function EditPage() {
-  // Redirect when no image was uploaded before
   const router = useRouter()
+  // Redirect when no image was uploaded before
   useEffect(() => {
     const loadImage = async () => {
       const image = await getOriginalImage()
@@ -18,6 +18,8 @@ export default function EditPage() {
       }
       setOriginalImage(image)
       setEditedImage(image)
+      // Process Image with default settings on load
+      processImage()
     }
     loadImage()
   }, [])
@@ -25,13 +27,28 @@ export default function EditPage() {
   const [originalImage, setOriginalImage] = useState<File | null>(null)
   const [editedImage, setEditedImage] = useState<File | null>(originalImage)
 
+  const [originalImageURL, setOriginalImageURL] = useState<string | null>(null)
+  const [editedImageURL, setEditedImageURL] = useState<string | null>(null)
+
+  // Create object URLs for the original and edited images. Revoke old URLs to prevent memory leaks.
+  useEffect(() => {
+    if (originalImage) {
+      URL.revokeObjectURL(originalImageURL || "")
+      setOriginalImageURL(URL.createObjectURL(originalImage))
+    }
+    if (editedImage) {
+      URL.revokeObjectURL(editedImageURL || "")
+      setEditedImageURL(URL.createObjectURL(editedImage))
+    }
+  }, [originalImage, editedImage])
+
   const [settings, setSettings] = useState({
     format: "webp",
     quality: 80,
   })
 
   const processImage = async () => {
-    const originalImage = getStoredImage()
+    const originalImage = await getOriginalImage()
     if (!originalImage) return
     setOriginalImage(originalImage)
     console.log("Original image retrieved from indexedDB")
@@ -67,11 +84,11 @@ export default function EditPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden">
+    <div className="grid h-screen grid-cols-1 overflow-hidden lg:grid-cols-12">
       {originalImage && editedImage && (
         <ImageDiffViewer
-          beforeSrc={originalImage}
-          afterSrc={editedImage}
+          beforeSrc={originalImageURL}
+          afterSrc={editedImageURL}
           className="col-span-1 h-full lg:col-span-5"
         />
       )}
