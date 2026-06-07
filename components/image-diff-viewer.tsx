@@ -7,8 +7,8 @@ import {
 } from "react-compare-slider"
 
 type ImageDiffViewerProps = {
-  beforeSrc: string
-  afterSrc: string
+  beforeSrc: string | null
+  afterSrc: string | null
   alt?: string
   className?: string
 }
