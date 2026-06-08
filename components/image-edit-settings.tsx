@@ -60,10 +60,10 @@ export default function ImageEditSettings({
       </Combobox>
       {/* Quality slider */}
       <div className="grid w-full grid-cols-2 items-end">
-        <label htmlFor="quality" className="text-sm font-medium text-left">
+        <label htmlFor="quality" className="text-left text-sm font-medium">
           Quality
         </label>
-        <label htmlFor="quality" className="text-sm font-medium text-right">
+        <label htmlFor="quality" className="text-right text-sm font-medium">
           {settings.quality}%
         </label>
       </div>

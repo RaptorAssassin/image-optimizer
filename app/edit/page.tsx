@@ -101,15 +101,14 @@ export default function EditPage() {
   return (
     <div className="grid h-screen w-screen grid-cols-1 overflow-hidden lg:grid-cols-3">
       {originalImage && editedImage && (
-        <div className="col-span-1 h-full w-full lg:col-span-2">
+        <div className="col-span-1 h-full min-w-0 overflow-hidden lg:col-span-2">
           <ImageDiffViewer
             beforeSrc={originalImageURL}
             afterSrc={editedImageURL}
-            className="h-full w-full"
+            className="h-full w-full object-contain"
           />
         </div>
       )}
-
       <div className="col-span-1 h-full w-full border-l lg:col-span-1">
         <ImageEditSettings
           settings={settings}
