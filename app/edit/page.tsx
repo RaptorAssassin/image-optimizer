@@ -113,6 +113,8 @@ export default function EditPage() {
         <ImageEditSettings
           settings={settings}
           onSettingsChange={handleSettingsChange}
+          originalSize={originalImage?.size}
+          editedSize={editedImage?.size}
           className="h-full w-full"
         />
       </div>
