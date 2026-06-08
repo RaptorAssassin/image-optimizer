@@ -17,6 +17,7 @@ import {
   downloadEditedImage,
   OUTPUT_FORMATS,
 } from "@/lib/storage"
+import FileSizeComparison from "./filesize-comparison"
 
 interface ImageEditSettingsProps {
   settings: {
@@ -24,6 +25,8 @@ interface ImageEditSettingsProps {
     quality: number
   }
   onSettingsChange: (settings: ImageEditSettingsProps["settings"]) => void
+  originalSize?: number
+  editedSize?: number
   className?: string
 }
 
@@ -31,6 +34,8 @@ export default function ImageEditSettings({
   settings,
   onSettingsChange,
   className,
+  originalSize,
+  editedSize,
 }: ImageEditSettingsProps) {
   return (
     <div className={`flex h-full w-full flex-col gap-4 p-4 ${className}`}>
@@ -76,6 +81,11 @@ export default function ImageEditSettings({
           onSettingsChange({ ...settings, quality: value[0] })
         }
         disabled={settings.format === "raw"}
+      />
+      {/* File size comparison */}
+      <FileSizeComparison
+        originalSize={originalSize ?? 0}
+        editedSize={editedSize ?? 0}
       />
       {/* Download button */}
       <Button onClick={downloadEditedImage}>Download</Button>
