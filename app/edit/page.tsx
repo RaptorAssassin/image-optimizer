@@ -29,6 +29,8 @@ export default function EditPage() {
   const [originalImageURL, setOriginalImageURL] = useState<string | null>(null)
   const [editedImageURL, setEditedImageURL] = useState<string | null>(null)
 
+  const [isProcessing, setIsProcessing] = useState(false)
+
   // Create object URLs for the original and edited images. Revoke old URLs to prevent memory leaks.
   useEffect(() => {
     if (originalImage) {
@@ -47,8 +49,12 @@ export default function EditPage() {
   })
 
   const processImage = async () => {
+    setIsProcessing(true)
     const originalImage = await getOriginalImage()
-    if (!originalImage) return
+    if (!originalImage) {
+      setIsProcessing(false)
+      return
+    }
     setOriginalImage(originalImage)
     console.log("Original image retrieved from indexedDB")
 
@@ -64,6 +70,7 @@ export default function EditPage() {
 
       if (!response.ok) {
         console.error("Error processing image")
+        setIsProcessing(false)
         return
       }
 
@@ -79,9 +86,11 @@ export default function EditPage() {
       )
       setEditedImage(processedImageFile)
       storeImage(originalImage, processedImageFile)
+      setIsProcessing(false)
       console.log("Edited image stored in indexedDB")
     } catch (error) {
       console.error("Error processing image")
+      setIsProcessing(false)
       return
     }
   }
@@ -115,6 +124,7 @@ export default function EditPage() {
           onSettingsChange={handleSettingsChange}
           originalSize={originalImage?.size}
           editedSize={editedImage?.size}
+          isProcessing={isProcessing}
           className="h-full w-full"
         />
       </div>

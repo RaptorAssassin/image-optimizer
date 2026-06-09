@@ -10,6 +10,7 @@ import {
   ComboboxList,
   ComboboxItem,
 } from "./ui/combobox"
+import { Spinner } from "./ui/spinner"
 import { Button } from "./ui/button"
 import {
   getOriginalImage,
@@ -18,6 +19,7 @@ import {
   OUTPUT_FORMATS,
 } from "@/lib/storage"
 import FileSizeComparison from "./filesize-comparison"
+import RepositoryLink from "./repository-link"
 
 interface ImageEditSettingsProps {
   settings: {
@@ -27,6 +29,7 @@ interface ImageEditSettingsProps {
   onSettingsChange: (settings: ImageEditSettingsProps["settings"]) => void
   originalSize?: number
   editedSize?: number
+  isProcessing?: boolean
   className?: string
 }
 
@@ -36,10 +39,18 @@ export default function ImageEditSettings({
   className,
   originalSize,
   editedSize,
+  isProcessing,
 }: ImageEditSettingsProps) {
   return (
-    <div className={`flex h-full w-full flex-col gap-4 p-4 ${className}`}>
-      <h1 className="text-4xl font-extrabold">Settings</h1>
+    <div
+      className={`relative flex h-full w-full flex-col gap-4 p-4 ${className}`}
+    >
+      {/* Title and Spinner */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-4xl font-extrabold">Settings</h1>
+        {isProcessing && <Spinner className="h-9 w-9" />}
+      </div>
+
       {/* Format combobox */}
       <Combobox
         items={OUTPUT_FORMATS}
@@ -89,6 +100,10 @@ export default function ImageEditSettings({
       />
       {/* Download button */}
       <Button onClick={downloadEditedImage}>Download</Button>
+      {/* Repo link */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 transform">
+        <RepositoryLink />
+      </div>
     </div>
   )
 }
