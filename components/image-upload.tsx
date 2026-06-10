@@ -4,7 +4,7 @@ import { storeImage } from "@/lib/storage"
 import { UploadIcon, Check, X } from "lucide-react"
 import { motion, AnimatePresence, type Transition } from "framer-motion"
 import { Spinner } from "./ui/spinner"
-import { SUPPORTED_INPUT_FORMATS } from "../data/fileFormats"
+import { INPUT_FORMATS, MIME_TYPE_MAP, EXTENSION_MAP } from "@/lib/storage"
 import { useRouter } from "next/navigation"
 
 export default function ImageUpload() {
@@ -51,7 +51,7 @@ export default function ImageUpload() {
     }
   }, [])
 
-  const acceptString = SUPPORTED_INPUT_FORMATS.map((f) => f.mimeType).join(",")
+  const acceptString = INPUT_FORMATS.map((f) => MIME_TYPE_MAP[f]).join(",")
 
   const handleSelectedFile = async (file?: File | null) => {
     if (!file) return
@@ -90,14 +90,15 @@ export default function ImageUpload() {
         const types = [
           {
             description: "Images",
-            accept: SUPPORTED_INPUT_FORMATS.reduce(
-              (acc, cur) => {
-                if (!acc[cur.mimeType]) acc[cur.mimeType] = []
-                acc[cur.mimeType].push(cur.extension)
-                return acc
-              },
-              {} as Record<string, string[]>
-            ),
+            accept: {
+              "image/jpeg": [".jpg", ".jpeg"],
+              "image/png": [".png"],
+              "image/webp": [".webp"],
+              "image/avif": [".avif"],
+              "image/gif": [".gif"],
+              "image/tiff": [".tiff"],
+              "image/svg+xml": [".svg"],
+            },
           },
         ]
 

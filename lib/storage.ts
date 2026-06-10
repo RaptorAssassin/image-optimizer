@@ -11,7 +11,8 @@ export const INPUT_FORMATS = [
   "gif",
   "tiff",
   "svg",
-] as const
+]
+
 export const OUTPUT_FORMATS = [
   //"jpeg",
   "jpg",
@@ -20,7 +21,28 @@ export const OUTPUT_FORMATS = [
   "avif",
   "gif",
   "tiff",
-] as const
+]
+
+export const MIME_TYPE_MAP: Record<(typeof INPUT_FORMATS)[number], string> = {
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  avif: "image/avif",
+  gif: "image/gif",
+  tiff: "image/tiff",
+  svg: "image/svg+xml",
+}
+
+export const EXTENSION_MAP: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/avif": ".avif",
+  "image/gif": ".gif",
+  "image/tiff": ".tiff",
+  "image/svg+xml": ".svg",
+}
 
 /**
  * Stores the original and edited images in IndexedDB using Dexie.
