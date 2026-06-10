@@ -12,11 +12,11 @@ A Fullstack Web app built with Next.js for compressing and optimizing images. <b
 # Tech Stack
 
 <p align="center">
-    <img src="https://simpleicons.org/icons/nextdotjs.svg" alt="Next.js" style="max-width: 100px; width: 100%; height: auto; filter: brightness(0) invert(1);">
-    <img src="https://simpleicons.org/icons/react.svg" alt="React" style="max-width: 100px; width: 100%; height: auto; filter: brightness(0) invert(1);">
-    <img src="https://simpleicons.org/icons/tailwindcss.svg" alt="TailwindCSS" style="max-width: 100px; width: 100%; height: auto; filter: brightness(0) invert(1);">
-    <img src="https://simpleicons.org/icons/shadcnui.svg" alt="Shadcn" style="max-width: 100px; width: 100%; height: auto; filter: brightness(0) invert(1);">
-    <img src="https://simpleicons.org/icons/sharp.svg" alt="Sharp" style="max-width: 100px; width: 100%; height: auto; filter: brightness(0) invert(1);">
+    <img src="https://simpleicons.org/icons/nextdotjs.svg" alt="Next.js" width="150px" style="filter: brightness(0) invert(1);">
+    <img src="https://simpleicons.org/icons/react.svg" alt="React" width="150px" style="filter: brightness(0) invert(1);">
+    <img src="https://simpleicons.org/icons/tailwindcss.svg" alt="TailwindCSS" width="150px" style="filter: brightness(0) invert(1);">
+    <img src="https://simpleicons.org/icons/shadcnui.svg" alt="Shadcn" width="150px" style="filter: brightness(0) invert(1);">
+    <img src="https://simpleicons.org/icons/sharp.svg" alt="Sharp" width="150px" style="filter: brightness(0) invert(1);">
 </p>
 
 **Framework:** Next.js 16.2 (App Router) <br>
